@@ -38,21 +38,105 @@ class Window(QtWidgets.QMainWindow):
         self.action_file_open=QtWidgets.QAction(QtGui.QIcon('Icons/open.png'),"Open",self)
         self.action_file_open.setShortcut("Ctrl+O")
         self.action_file_open.setStatusTip("Open file")
+
+        self.action_file_save=QtWidgets.QAction(QtGui.QIcon('Icons/save.png'),"Save",self)
+        self.action_file_save.setShortcut("Ctrl+S")
+        self.action_file_save.setStatusTip("Save file")
+
+        self.action_file_save_as=QtWidgets.QAction(QtGui.QIcon('Icons/save_as.png'),"Save as",self)
+        self.action_file_save_as.setShortcut("Ctrl+Shift+S")
+        self.action_file_save_as.setStatusTip("Save file as")
+
+        # self.action_file_print=QtWidgets.QAction(QtGui.QIcon('Icons/print.png'),"Print",self)
+        # self.action_file_print.setShortcut("Ctrl+P")
+        # self.action_file_print.setStatusTip("Print file")
+        
+        self.action_file_exit=QtWidgets.QAction(QtGui.QIcon('Icons/exit.png'),"Exit",self)
+        self.action_file_exit.setShortcut("Ctrl+Q")
+        self.action_file_exit.setStatusTip("Exit application")
+        self.action_file_exit.triggered.connect(self.close)
+        # self.action_file_exit.setStatusTip("Exit application")
+
+
+        
         # Tools actions
         self.action_tools=QtWidgets.QActionGroup(self)
+        self.action_tools.setExclusive(True)
+
+        # Add tool actions to the action group
+        self.action_tools.addAction(self.action_tools_line)
+        self.action_tools.addAction(self.action_tools_rectangle)
+        self.action_tools.addAction(self.action_tools_ellipse)
+        self.action_tools.addAction(self.action_tools_polygon)
+        self.action_tools.addAction(self.action_tools_text)
+
+
+        # Line tool
         self.action_tools_line=QtWidgets.QAction(
         self.tr("&Line"),self)
         self.action_tools_line.setCheckable(True)
         self.action_tools_line.setChecked(True)
         self.action_tools.addAction(self.action_tools_line)
+
+        # Rectangle tool
+        self.action_tools_rectangle=QtWidgets.QAction(
+        self.tr("&Rectangle"),self)
+        self.action_tools_rectangle.setCheckable(True)
+        self.action_tools_rectangle.setChecked(True)
+        self.action_tools.addAction(self.action_tools_rectangle)
+        
+        # Ellipse tool
+        self.action_tools_ellipse=QtWidgets.QAction(
+        self.tr("&Ellipse"),self)
+        self.action_tools_ellipse.setCheckable(True)
+        self.action_tools_ellipse.setChecked(True)
+        self.action_tools.addAction(self.action_tools_ellipse)
+
+        # Polygon tool
+        self.action_tools_polygon=QtWidgets.QAction(
+        self.tr("&Polygon"),self)
+        self.action_tools_polygon.setCheckable(True)
+        self.action_tools_polygon.setChecked(True)
+        self.action_tools.addAction(self.action_tools_polygon)
+
+        # Text tool
+        self.action_tools_text=QtWidgets.QAction(
+        self.tr("&Text"),self)
+        self.action_tools_text.setCheckable(True)
+        self.action_tools_text.setChecked(True)
+        self.action_tools.addAction(self.action_tools_text)
+
+
         # Style actions    
         self.action_style_pen_color=QtWidgets.QAction(self.tr("&Color"),self)
         # Help actions    
     def connect_actions(self) :
         self.action_file_open.triggered.connect(self.file_open)
+
+        self.action_file_save.triggered.connect(self.file_save)
+
+        self.action_file_save_as.triggered.connect(self.file_save_as)
+
+        # self.action_file_print.triggered.connect(self.file_print)
+
+        self.action_file_exit.triggered.connect(self.close)
+
         self.action_tools_line.triggered.connect(
-            lambda checked,tool="line": self.tools_selection(checked,tool)
+            lambda checked, tool="line": self.tools_selection(checked, tool)
         )
+        self.action_tools_rectangle.triggered.connect(
+            lambda checked, tool="rectangle": self.tools_selection(checked, tool)
+        )
+        self.action_tools_ellipse.triggered.connect(
+            lambda checked, tool="ellipse": self.tools_selection(checked, tool)
+        )
+        self.action_tools_polygon.triggered.connect(
+            lambda checked, tool="polygon": self.tools_selection(checked, tool)
+        )
+        self.action_tools_text.triggered.connect(
+            lambda checked, tool="text": self.tools_selection(checked, tool)
+        )
+
         self.action_style_pen_color.triggered.connect(self.style_pen_color_selection)
 
     # File actions implementation
@@ -60,6 +144,25 @@ class Window(QtWidgets.QMainWindow):
         filename = QtWidgets.QFileDialog.getOpenFileName(self,"Open File", os.getcwd())
         fileopen=QtCore.QFile(filename[0])
         print("open",fileopen)
+    
+    def file_save(self):
+        filename = QtWidgets.QFileDialog.getSaveFileName(self,"Save File", os.getcwd())
+        filesave=QtCore.QFile(filename[0])
+        print("save",filesave)
+    
+    def file_save_as(self):
+        filename = QtWidgets.QFileDialog.getSaveFileName(self,"Save File", os.getcwd())
+        filesaveas=QtCore.QFile(filename[0])
+        print("save as",filesaveas)
+    
+    # def file_print(self):
+    #     filename = QtWidgets.QFileDialog.getSaveFileName(self,"Print File", os.getcwd())
+    #     fileprint=QtCore.QFile(filename[0])
+    #     print("print",fileprint)
+
+    # def file_exit(self):
+    #     self.close()
+    #     print("exit")
 
     # Tools actions implementation
     def tools_selection(self,checked,tool) :
@@ -83,8 +186,19 @@ class Window(QtWidgets.QMainWindow):
         menubar = self.menuBar()
         menu_file = menubar.addMenu('&File')
         menu_file.addAction(self.action_file_open)
+        menu_file.addAction(self.action_file_save)
+        menu_file.addAction(self.action_file_save_as)
+        # menu_file.addAction(self.action_file_print)
+        menu_file.addSeparator()
+        menu_file.addAction(self.action_file_exit)
         menu_tool = menubar.addMenu('&Tools')
         menu_tool.addAction(self.action_tools_line)
+        menu_tool.addAction(self.action_tools_rectangle)
+        menu_tool.addAction(self.action_tools_ellipse)
+        menu_tool.addAction(self.action_tools_polygon)
+        menu_file.addSeparator()
+        menu_tool.addAction(self.action_tools_text)
+        
 
         menu_style= menubar.addMenu('&Style')
         menu_style_pen= menu_style.addMenu('&Pen')
@@ -93,8 +207,17 @@ class Window(QtWidgets.QMainWindow):
         # # Toolbar actions
         toolbar=self.addToolBar("File")
         toolbar.addAction(self.action_file_open)
-        # toolbar=self.addToolBar("Tools")
-        # toolbar.addAction(self.action_tools_line)
+        toolbar.addAction(self.action_file_save)
+        toolbar.addAction(self.action_file_save_as)
+        # toolbar.addAction(self.action_file_print)
+        toolbar.addSeparator()
+        toolbar.addAction(self.action_file_exit)
+        toolbar=self.addToolBar("Tools")
+        toolbar.addAction(self.action_tools_line)
+        toolbar.addAction(self.action_tools_rectangle)
+        toolbar.addAction(self.action_tools_ellipse)
+        toolbar.addAction(self.action_tools_polygon)
+        toolbar.addAction(self.action_tools_text)
         # # Statusbar 
         statusbar=self.statusBar()
 

@@ -103,6 +103,28 @@ class View (QtWidgets.QGraphicsView) :
                 rect.setPen(self.pen)
                 rect.setBrush(self.brush)
                 self.scene().addItem(rect)
+            elif self.tool=="ellipse" :
+                ellipse=QtWidgets.QGraphicsEllipseItem(
+                                    self.begin.x(),self.begin.y(),
+                                    abs(self.end.x()-self.begin.x()),
+                                    abs(self.end.y()-self.begin.y())
+                            )
+                ellipse.setPen(self.pen)
+                ellipse.setBrush(self.brush)
+                self.scene().addItem(ellipse)
+            elif self.tool == "polygon":
+                polygon = QtWidgets.QGraphicsPolygonItem()
+                polygon.setPen(self.pen)
+                polygon.setBrush(self.brush)
+                polygon.setPolygon(QtGui.QPolygonF([QtCore.QPointF(self.begin), QtCore.QPointF(self.end)]))
+                self.scene().addItem(polygon)
+            elif self.tool=="text" :
+                text=QtWidgets.QGraphicsTextItem("Hello World")
+                text.setPos(self.begin)
+                text.setFont(QtGui.QFont("Arial", 20))
+                text.setDefaultTextColor(self.pen.color())
+                self.scene().addItem(text)
+            
             else :
                 print("nothing to draw !")
         else :
