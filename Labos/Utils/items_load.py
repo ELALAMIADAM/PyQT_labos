@@ -19,9 +19,8 @@ def data_to_items(scene,data):
             scene.addLine(x1, y1, x2, y2)
 
 def load_scene(scene,name) :
-    data = json.load(open(name,"r"))
-    print("data",data)
-    return data
+    dico = json.load(open(name,"r"))
+    print("dico",dico)
         
 if __name__ == "__main__":
     print(QT_VERSION_STR)
@@ -29,8 +28,7 @@ if __name__ == "__main__":
     scene=QtWidgets.QGraphicsScene()
     filename="scene.json"
     #------------- scene creation --------------------
-    data=load_scene(scene,filename) 
-    data_to_items(scene,data)
+    load_scene(scene,filename) 
     #-------------------------------------------------
     view=QtWidgets.QGraphicsView(scene)
     view.show()

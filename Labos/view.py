@@ -1,6 +1,36 @@
 #!/usr/bin/python
 import sys
 from PyQt5 import QtCore,QtGui,QtWidgets
+from PyQt5.QtGui import QPolygonF
+from PyQt5.QtCore import Qt
+import json
+
+class EditableTextItem(QtWidgets.QGraphicsTextItem):
+    def __init__(self, text="click to edit text, and press ESC to save"):
+        super().__init__(text)
+        self.setFlag(QtWidgets.QGraphicsTextItem.ItemIsSelectable)
+        self.setTextInteractionFlags(QtCore.Qt.TextEditorInteraction)
+
+    def focusOutEvent(self, event):
+        self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
+        # Save the edited text when focus is lost
+        self.saveText()
+        super().focusOutEvent(event)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            # Save the edited text when the Escape key is pressed
+            self.saveText()
+            self.clearFocus()  # Remove focus to end editing
+        else:
+            super().keyPressEvent(event)
+
+    def saveText(self):
+        edited_text = self.toPlainText()
+        # Here, you can implement the logic to save the edited text.
+        # For example, you can update a variable, emit a signal, or
+        # save the text to a file/database.
+        print("Saved text:", edited_text)
 
 class View (QtWidgets.QGraphicsView) :
     def __init__(self,position=(0,0),dimension=(600,400)):
@@ -14,6 +44,9 @@ class View (QtWidgets.QGraphicsView) :
         self.pen,self.brush=None,None
         self.tool="rectangle"
         self.item=None
+
+        self.polygonPointsSets = []  # Initialize an empty list for sets of polygon points
+        self.currentPolygonPoints = []  # Current working polygon points
         
         self.create_style()
 
@@ -60,17 +93,61 @@ class View (QtWidgets.QGraphicsView) :
         self.brush.setColor(QtGui.QColor(color))
 
     # Events
+    # def mousePressEvent(self, event):
+    #     print("View.mousePressEvent()")
+    #     print("event.pos() : ",event.pos())
+    #     print("event.screenPos() : ",event.screenPos())
+    #     self.begin=self.end=event.pos()
+    #     if self.scene() :
+    #         self.item=self.scene().itemAt(self.begin,QtGui.QTransform())
+    #         if self.item :
+    #             self.offset =self.begin-self.item.pos()
+    #     else :
+    #         print("View need a scene to display items !!")
+
     def mousePressEvent(self, event):
         print("View.mousePressEvent()")
-        print("event.pos() : ",event.pos())
-        print("event.screenPos() : ",event.screenPos())
-        self.begin=self.end=event.pos()
-        if self.scene() :
-            self.item=self.scene().itemAt(self.begin,QtGui.QTransform())
-            if self.item :
-                self.offset =self.begin-self.item.pos()
-        else :
-            print("View need a scene to display items !!")
+        print("event.pos() : ", event.pos())
+        print("event.screenPos() : ", event.screenPos())
+        self.begin = self.end = event.pos()
+        if self.scene():
+            self.item = self.scene().itemAt(self.begin, QtGui.QTransform())
+            if self.item:
+                self.offset = self.begin - self.item.pos()
+            if self.tool == "polygon" and self.scene():
+                # Add the clicked point to the current polygon
+                self.currentPolygonPoints.append(event.pos())
+                if len(self.currentPolygonPoints) > 1:
+                    # Draw a temporary line between the last two points
+                    temp_line = QtWidgets.QGraphicsLineItem(
+                        QtCore.QLineF(self.currentPolygonPoints[-2], self.currentPolygonPoints[-1])
+                    )
+                    temp_line.setPen(self.pen)
+                    self.scene().addItem(temp_line)
+
+    def mouseDoubleClickEvent(self, event):
+        if self.tool == "polygon":
+            self.finalizeCurrentPolygon()
+
+
+    def finalizeCurrentPolygon(self):
+        # Finalize the current polygon
+        if self.tool == "polygon" and self.scene() and self.currentPolygonPoints:
+            polygon = QPolygonF(self.currentPolygonPoints)
+            polygonItem = QtWidgets.QGraphicsPolygonItem(polygon)
+            polygonItem.setPen(self.pen)
+            polygonItem.setBrush(self.brush)
+            self.scene().addItem(polygonItem)
+            self.polygonPointsSets.append(self.currentPolygonPoints)
+
+            # Remove temporary lines
+            for line in self.scene().items():
+                if isinstance(line, QtWidgets.QGraphicsLineItem):
+                    self.scene().removeItem(line)
+
+            # Clear the current points list for a new polygon
+            self.currentPolygonPoints = []
+
 
     def mouseMoveEvent(self, event):
         self.end=event.pos()
@@ -112,19 +189,35 @@ class View (QtWidgets.QGraphicsView) :
                 ellipse.setPen(self.pen)
                 ellipse.setBrush(self.brush)
                 self.scene().addItem(ellipse)
-            elif self.tool == "polygon":
-                polygon = QtWidgets.QGraphicsPolygonItem()
-                polygon.setPen(self.pen)
-                polygon.setBrush(self.brush)
-                polygon.setPolygon(QtGui.QPolygonF([QtCore.QPointF(self.begin), QtCore.QPointF(self.end)]))
-                self.scene().addItem(polygon)
-            elif self.tool=="text" :
-                text=QtWidgets.QGraphicsTextItem("Hello World")
-                text.setPos(self.begin)
-                text.setFont(QtGui.QFont("Arial", 20))
-                text.setDefaultTextColor(self.pen.color())
-                self.scene().addItem(text)
-            
+            elif self.tool == "polygon" and self.scene():
+                # If the user releases the mouse while drawing a polygon, update the temporary line
+                if len(self.currentPolygonPoints) > 0:
+                    temp_line = QtWidgets.QGraphicsLineItem(
+                        QtCore.QLineF(self.currentPolygonPoints[-1], self.end)
+                    )
+                    temp_line.setPen(self.pen)
+                    self.scene().addItem(temp_line)
+                
+
+
+            elif self.tool == 'text':
+                # Check if there's an existing text item at the clicked position
+                text_item = self.scene().itemAt(event.pos(), QtGui.QTransform())
+                if isinstance(text_item, EditableTextItem):
+                    # Enable editing for the existing text item
+                    text_item.setTextInteractionFlags(QtCore.Qt.TextEditorInteraction)
+                    text_item.setFocus(QtCore.Qt.MouseFocusReason)
+                else:
+                    # Create a new editable text item if none exists
+                    text_item = EditableTextItem("Click to edit text")
+                    text_item.setPos(event.pos())
+                    text_item.setFont(QtGui.QFont("Arial", 20))
+                    text_item.setDefaultTextColor(self.pen.color())
+                    self.scene().addItem(text_item)
+                    # Enable editing immediately after creation
+                    text_item.setTextInteractionFlags(QtCore.Qt.TextEditorInteraction)
+                    text_item.setFocus(QtCore.Qt.MouseFocusReason)
+                        
             else :
                 print("nothing to draw !")
         else :
@@ -135,6 +228,7 @@ class View (QtWidgets.QGraphicsView) :
         print("width : {}, height : {}".format(self.size().width(),self.size().height()))
    
 if __name__ == "__main__" :  
+
     print(QtCore.QT_VERSION_STR)
     app=QtWidgets.QApplication(sys.argv)
 
