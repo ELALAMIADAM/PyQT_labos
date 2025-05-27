@@ -296,6 +296,122 @@ class View (QtWidgets.QGraphicsView) :
         print("View.resizeEvent()")
         print("width : {}, height : {}".format(self.size().width(),self.size().height()))
    
+
+    def contextMenuEvent(self, event):
+        menu = QtWidgets.QMenu()
+        
+        # Sous-menu des outils
+        tools_menu = menu.addMenu("Tools")
+        line_action = tools_menu.addAction("Line")
+        rect_action = tools_menu.addAction("Rectangle")
+        ellipse_action = tools_menu.addAction("Ellipse")
+        polygon_action = tools_menu.addAction("Polygon")
+        text_action = tools_menu.addAction("Text")
+        
+        # Sous-menu de style
+        style_menu = menu.addMenu("Style")
+        pen_menu = style_menu.addMenu("Pen")
+        pen_color_action = pen_menu.addAction("Color")
+        pen_width_action = pen_menu.addAction("Width")
+        pen_style_action = pen_menu.addAction("Style")
+        
+        brush_menu = style_menu.addMenu("Brush")
+        brush_color_action = brush_menu.addAction("Color")
+        brush_style_action = brush_menu.addAction("Fill")
+        
+        # Action Effacer
+        menu.addSeparator()
+        erase_action = menu.addAction("Erase")
+        
+        # Exécution du menu
+        action = menu.exec_(event.globalPos())
+        
+        if action == line_action:
+            self.set_tool("line")
+        elif action == rect_action:
+            self.set_tool("rectangle")
+        elif action == ellipse_action:
+            self.set_tool("ellipse")
+        elif action == polygon_action:
+            self.set_tool("polygon")
+        elif action == text_action:
+            self.set_tool("text")
+        elif action == pen_color_action:
+            color = QtWidgets.QColorDialog.getColor()
+            if color.isValid():
+                self.set_pen_color(color)
+        elif action == pen_width_action:
+            width, ok = QtWidgets.QInputDialog.getInt(self, "Pen Width", "Enter width:", 
+                                                 self.pen.width(), 1, 20)
+            if ok:
+                self.set_pen_width(width)
+        elif action == pen_style_action:
+            styles = {
+                "Solid": QtCore.Qt.SolidLine,
+                "Dash": QtCore.Qt.DashLine,
+                "Dot": QtCore.Qt.DotLine,
+                "Dash Dot": QtCore.Qt.DashDotLine,
+                "Dash Dot Dot": QtCore.Qt.DashDotDotLine
+            }
+            style, ok = QtWidgets.QInputDialog.getItem(self, "Pen Style", 
+                                                  "Select style:", styles.keys(), 0, False)
+            if ok and style:
+                self.set_pen_style(styles[style])
+        elif action == brush_color_action:
+            color = QtWidgets.QColorDialog.getColor()
+            if color.isValid():
+                self.set_brush_color(color)
+        elif action == brush_style_action:
+            styles = {
+                "Solid": QtCore.Qt.SolidPattern,
+                "Dense1": QtCore.Qt.Dense1Pattern,
+                "Dense2": QtCore.Qt.Dense2Pattern,
+                "Dense3": QtCore.Qt.Dense3Pattern,
+                "Dense4": QtCore.Qt.Dense4Pattern,
+                "Dense5": QtCore.Qt.Dense5Pattern,
+                "Dense6": QtCore.Qt.Dense6Pattern,
+                "Dense7": QtCore.Qt.Dense7Pattern,
+                "Horizontal": QtCore.Qt.HorPattern,
+                "Vertical": QtCore.Qt.VerPattern,
+                "Cross": QtCore.Qt.CrossPattern,
+                "BDiag": QtCore.Qt.BDiagPattern,
+                "FDiag": QtCore.Qt.FDiagPattern,
+                "DiagCross": QtCore.Qt.DiagCrossPattern
+            }
+            style, ok = QtWidgets.QInputDialog.getItem(self, "Brush Style", 
+                                                  "Select style:", styles.keys(), 0, False)
+            if ok and style:
+                self.set_brush_style(styles[style])
+        elif action == erase_action:
+            reply = QtWidgets.QMessageBox.warning(self, "Warning", 
+                                             "Are you sure you want to erase everything?", 
+                                             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+            # if reply == QtWidgets.QMessageBox.Yes:
+            #     self.scene().clear()
+            #     self.undo_stack.clear()
+            #     self.redo_stack.clear()
+            if reply == QtWidgets.QMessageBox.Yes:
+                try:
+                    scene = self.scene()
+                    if scene is not None:
+                        scene.clear()
+                    
+                    if hasattr(self, 'undo_stack'):
+                        self.undo_stack.clear()
+                    if hasattr(self, 'redo_stack'):
+                        self.redo_stack.clear()
+                except Exception as e:
+                    QtWidgets.QMessageBox.critical(
+                        self,
+                        "Error",
+                        f"An error occurred while erasing: {str(e)}"
+                    )
+
+
+
+
+
+
 if __name__ == "__main__" :  
 
     print(QtCore.QT_VERSION_STR)
