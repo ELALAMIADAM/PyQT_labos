@@ -107,6 +107,11 @@ class Window(QtWidgets.QMainWindow):
         self.action_help=QtWidgets.QActionGroup(self)
         self.action_help_aboutus=QtWidgets.QAction(self.tr("&About Us"),self)
 
+        self.action_help_aboutqt = QtWidgets.QAction(self.tr("&About Qt"), self)
+        self.action_help_aboutapp = QtWidgets.QAction(self.tr("&About the Application"), self)
+
+
+
         # Help actions    
     def connect_actions(self) :
         self.action_file_new.triggered.connect(self.file_new)
@@ -154,9 +159,13 @@ class Window(QtWidgets.QMainWindow):
         # Help actions
         self.action_help_aboutus.triggered.connect(self.about_us)
 
+        self.action_help_aboutqt.triggered.connect(self.about_qt)
+        self.action_help_aboutapp.triggered.connect(self.about_app)
 
 
-    
+
+
+
     # File actions implementation
     def file_new(self):
         reply = QtWidgets.QMessageBox.warning(self, "Warning", 
@@ -185,6 +194,47 @@ class Window(QtWidgets.QMainWindow):
         layout.addWidget(close_button)
         dialog.setLayout(layout)
         dialog.exec_()
+
+
+    def about_qt(self):
+        QtWidgets.QMessageBox.aboutQt(self, "About Qt")
+
+    def about_app(self):
+
+        # Obtenir le chemin du fichier actuel (main.py)
+        current_dir = os.path.dirname(__file__)
+
+        # Aller dans le dossier parent (../)
+        parent_dir = os.path.dirname(current_dir)
+
+        # Construire le chemin vers README.md
+        readme_path = os.path.join(parent_dir, "README.md")
+
+        try:
+            with open(readme_path, "r", encoding="utf-8") as f:
+                content = f.read()
+        except Exception as e:
+            content = f"Erreur lors de la lecture du fichier README : {e}"
+
+        dialog = QtWidgets.QDialog(self)
+        dialog.setWindowTitle("About the Application")
+        layout = QtWidgets.QVBoxLayout(dialog)
+
+        text_area = QtWidgets.QTextEdit()
+        text_area.setReadOnly(True)
+        text_area.setText(content)
+        layout.addWidget(text_area)
+
+        close_button = QtWidgets.QPushButton("Close", dialog)
+        close_button.clicked.connect(dialog.close)
+        layout.addWidget(close_button)
+
+        dialog.setLayout(layout)
+        dialog.resize(600, 400)
+        dialog.exec_()
+
+
+
 
 
     def file_open(self):
@@ -401,6 +451,9 @@ class Window(QtWidgets.QMainWindow):
         # Help menu
         menu_help = menubar.addMenu('&Help')
         menu_help.addAction(self.action_help_aboutus)
+        menu_help.addAction(self.action_help_aboutqt)
+        menu_help.addAction(self.action_help_aboutapp)
+
 
         # # Toolbar actions
         toolbar=self.addToolBar("File")
@@ -419,6 +472,8 @@ class Window(QtWidgets.QMainWindow):
         toolbar.addAction(self.action_tools_text)
         # # Statusbar 
         statusbar=self.statusBar()
+
+
 
     def resizeEvent(self, event):
         print("MainWindow.resizeEvent() : View")
