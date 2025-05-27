@@ -49,6 +49,7 @@ class View (QtWidgets.QGraphicsView) :
         self.currentPolygonPoints = []  # Current working polygon points
         
         self.create_style()
+        self.thickness=1.0
 
     def __repr__(self):
         return "<View({},{},{})>".format(self.pen,self.brush,self.tool)
@@ -84,6 +85,12 @@ class View (QtWidgets.QGraphicsView) :
         self.brush=QtGui.QBrush()
         self.brush.setColor(QtCore.Qt.blue)
         self.brush.setStyle(QtCore.Qt.CrossPattern)
+    def set_pen_thickness(self,thickness) :
+        print("View.set_pen_thickness(self,thickness)",thickness)
+        if isinstance(thickness, (int, float)) and thickness >= 0:
+            self.pen.setWidthF(float(thickness))
+        else:
+            print("Invalid pen thickness:", thickness)
     
     def set_pen_color(self,color) :
         print("View.set_pen_color(self,color)",color)
@@ -106,12 +113,12 @@ class View (QtWidgets.QGraphicsView) :
             self.brush.setStyle(style)
         else:
             print("Invalid brush style:", style)
-    def change_pen_width(self,width) :
-        print("View.change_pen_width(self,width)",width)
-        if isinstance(width, (int, float)) and width >= 0:
-            self.pen.setWidthF(float(width))
-        else:
-            print("Invalid pen width:", width)
+    # def change_pen_width(self,width) :
+    #     print("View.change_pen_width(self,width)",width)
+    #     if isinstance(width, (int, float)) and width >= 0:
+    #         self.pen.setWidthF(float(width))
+    #     else:
+    #         print("Invalid pen width:", width)
     def change_pen_cap_style(self,cap_style) :
         print("View.change_pen_cap_style(self,cap_style)",cap_style)
         if cap_style in [QtCore.Qt.FlatCap, QtCore.Qt.SquareCap, QtCore.Qt.RoundCap]:
@@ -160,7 +167,12 @@ class View (QtWidgets.QGraphicsView) :
             self.change_font_family(family)
     
     
-
+    def style_pen_thickness_selection(self):
+        print("Window.style_pen_thickness_selection()")
+        thickness, ok = QtWidgets.QInputDialog.getInt(self, "Pen Thickness", "Enter pen thickness:", 1, 1, 10)
+        if ok:
+            self.set_pen_thickness(thickness)
+    
     # Events
     # def mousePressEvent(self, event):
     #     print("View.mousePressEvent()")

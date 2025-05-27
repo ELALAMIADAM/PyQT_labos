@@ -90,18 +90,19 @@ class Window(QtWidgets.QMainWindow):
 
 
         # Style actions    
-        self.action_style_pen_color=QtWidgets.QAction(self.tr("&Color"),self)
-        self.action_brush_color_style=QtWidgets.QAction(self.tr("&Brush Color"),self)
+        self.action_style_pen_color=QtWidgets.QAction(QtGui.QIcon('Icons/colorize.png'),self.tr("&Color"),self)
+        self.action_brush_color_style=QtWidgets.QAction(QtGui.QIcon('Icons/colorize.png'),self.tr("&Brush Color"),self)
         self.action_style_pen_line_solid=QtWidgets.QAction(self.tr("&Solid"),self)
         self.action_style_pen_line_dash=QtWidgets.QAction(self.tr("&Dash"),self)
         self.action_style_pen_line_dot=QtWidgets.QAction(self.tr("&Dot"),self)
-        self.action_style_pen_thickness=QtWidgets.QAction(self.tr("&Thickness"),self)
-        self.action_style_width_1=QtWidgets.QAction(self.tr("&Width 1"),self)
-        self.action_style_width_2=QtWidgets.QAction(self.tr("&Width 2"),self)
+        # self.action_style_pen_thickness=QtWidgets.QAction(self.tr("&Thickness"),self)
+        # self.action_style_width_1=QtWidgets.QAction(self.tr("&Width 1"),self)
+        # self.action_style_width_2=QtWidgets.QAction(self.tr("&Width 2"),self)
+        self.action_set_width=QtWidgets.QAction(self.tr("&Width"),self)
         self.action_brush_fill_solid=QtWidgets.QAction(self.tr("&Solid"),self)
         self.action_brush_fill_dense=QtWidgets.QAction(self.tr("&Dense"),self)
         self.action_brush_fill_diag=QtWidgets.QAction(self.tr("&Diagonal"),self)
-        self.action_set_font_family=QtWidgets.QAction(self.tr("&Font Family"),self)
+        self.action_set_font_family=QtWidgets.QAction(QtGui.QIcon('Icons/tool_font.png'),self.tr("&Font Family"),self)
         # Help
         self.action_help=QtWidgets.QActionGroup(self)
         self.action_help_aboutus=QtWidgets.QAction(self.tr("&About Us"),self)
@@ -146,9 +147,9 @@ class Window(QtWidgets.QMainWindow):
         self.action_style_pen_line_solid.triggered.connect(lambda: self.view.change_pen_style(QtCore.Qt.SolidLine))
         self.action_style_pen_line_dash.triggered.connect(lambda: self.view.change_pen_style(QtCore.Qt.DashLine))
         self.action_style_pen_line_dot.triggered.connect(lambda: self.view.change_pen_style(QtCore.Qt.DotLine))
-        # self.action_style_pen_thickness.triggered.connect(self.view.style_pen_thickness_selection)
-        self.action_style_width_1.triggered.connect(lambda: self.view.change_pen_width(1))
-        self.action_style_width_2.triggered.connect(lambda: self.view.change_pen_width(2))
+        self.action_set_width.triggered.connect(self.view.style_pen_thickness_selection)
+        # self.action_style_width_1.triggered.connect(lambda: self.view.change_pen_width(1))
+        # self.action_style_width_2.triggered.connect(lambda: self.view.change_pen_width(2))
         self.action_brush_fill_solid.triggered.connect(lambda: self.view.change_brush_style(QtCore.Qt.SolidPattern))
         self.action_brush_fill_dense.triggered.connect(lambda: self.view.change_brush_style(QtCore.Qt.Dense1Pattern))
         self.action_brush_fill_diag.triggered.connect(lambda: self.view.change_brush_style(QtCore.Qt.DiagCrossPattern))
@@ -470,11 +471,7 @@ class Window(QtWidgets.QMainWindow):
         print("Window.style_pen_style_selection()")
         print("style : ",style)
         self.view.set_pen_style(style)
-    # def style_pen_thickness_selection(self):
-    #     print("Window.style_pen_thickness_selection()")
-    #     thickness, ok = QtWidgets.QInputDialog.getInt(self, "Pen Thickness", "Enter pen thickness:", 1, 1, 10)
-    #     if ok:
-    #         self.view.set_pen_thickness(thickness)
+
 
     def style_brush_style_selection(self,style) :
         print("Window.style_brush_style_selection()")
@@ -516,10 +513,10 @@ class Window(QtWidgets.QMainWindow):
         menu_style_pen_line.addAction(self.action_style_pen_line_solid)
         menu_style_pen_line.addAction(self.action_style_pen_line_dash)
         menu_style_pen_line.addAction(self.action_style_pen_line_dot)
-        menu_style_pen_line.addAction(self.action_style_pen_thickness)
-        menu_style_pen_width= menu_style_pen.addMenu('&Width')
-        menu_style_pen_width.addAction(self.action_style_width_1)
-        menu_style_pen_width.addAction(self.action_style_width_2)
+        # menu_style_pen_width= menu_style_pen.addMenu('&Width')
+        menu_style_pen.addAction(self.action_set_width)
+        # menu_style_pen_width.addAction(self.action_style_width_1)
+        # menu_style_pen_width.addAction(self.action_style_width_2)
         menu_style_brush= menu_style.addMenu('&Brush')
         menu_style_brush.addAction(self.action_brush_color_style)
         menu_style_brush_fill= menu_style_brush.addMenu('&Fill Style')
