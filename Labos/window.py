@@ -73,19 +73,19 @@ class Window(QtWidgets.QMainWindow):
         self.action_tools_line.setChecked(True)
         self.action_tools.addAction(self.action_tools_line)
         # Rectangle tool
-        self.action_tools_rect=QtWidgets.QAction(self.tr("&Rect"),self)
+        self.action_tools_rect=QtWidgets.QAction(QtGui.QIcon('Icons/tool_rectangle.png'),self.tr("&Rect"),self)
         self.action_tools_rect.setCheckable(True)
         self.action_tools.addAction(self.action_tools_rect)
         # Ellipse tool
-        self.action_tools_ellip=QtWidgets.QAction(self.tr("&Ellipse"),self)
+        self.action_tools_ellip=QtWidgets.QAction(QtGui.QIcon('Icons/tool_ellipse.png'),self.tr("&Ellipse"),self)
         self.action_tools_ellip.setCheckable(True)
         self.action_tools.addAction(self.action_tools_ellip)
         # Poly tool
-        self.action_tools_poly=QtWidgets.QAction(self.tr("&Polygon"),self)
+        self.action_tools_poly=QtWidgets.QAction(QtGui.QIcon('Icons/tool_polygon.png'),self.tr("&Polygon"),self)
         self.action_tools_poly.setCheckable(True)
         self.action_tools.addAction(self.action_tools_poly)
         # Text tool
-        self.action_tools_text=QtWidgets.QAction(self.tr("&Text"),self)
+        self.action_tools_text=QtWidgets.QAction(QtGui.QIcon('Icons/tool_line.png'),self.tr("&Text"),self)
         self.action_tools_text.setCheckable(True)
         self.action_tools.addAction(self.action_tools_text)
 
