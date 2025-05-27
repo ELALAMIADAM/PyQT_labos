@@ -3,7 +3,8 @@ import os,sys
 from PyQt5 import QtCore,QtGui,QtWidgets
 from PyQt5.QtWidgets import QUndoCommand, QUndoStack, QColorDialog, QMessageBox, QTextEdit
 
-from view import View
+from view import View, EditableTextItem
+from Utils.tools import Tool
 import json
 
 
@@ -34,6 +35,10 @@ class Window(QtWidgets.QMainWindow):
         self.view.setGeometry(x,y,w,h)
         self.scene.setSceneRect(x,y,w,h) 
         self.undo_stack = QtWidgets.QUndoStack(self)
+        
+        # Connect view's undo stack to window's undo stack
+        self.view.undo_stack = self.undo_stack
+        
         self.data = []
         self.create_actions()
         self.connect_actions()
@@ -234,21 +239,17 @@ class Window(QtWidgets.QMainWindow):
         QtWidgets.QMessageBox.aboutQt(self, "About Qt")
 
     def about_app(self):
-
-        # Obtenir le chemin du fichier actuel (main.py)
+        # Get the current directory path 
         current_dir = os.path.dirname(__file__)
-
-        # Aller dans le dossier parent (../)
-        parent_dir = os.path.dirname(current_dir)
-
-        # Construire le chemin vers README.md
-        readme_path = os.path.join(parent_dir, "README.md")
+        
+        # Construct the path to README.md in the same directory
+        readme_path = os.path.join(current_dir, "README.md")
 
         try:
             with open(readme_path, "r", encoding="utf-8") as f:
                 content = f.read()
         except Exception as e:
-            content = f"Erreur lors de la lecture du fichier README : {e}"
+            content = f"Error reading README file: {e}\n\nREADME.md should be in the same directory as this application."
 
         dialog = QtWidgets.QDialog(self)
         dialog.setWindowTitle("About the Application")
@@ -256,7 +257,7 @@ class Window(QtWidgets.QMainWindow):
 
         text_area = QtWidgets.QTextEdit()
         text_area.setReadOnly(True)
-        text_area.setText(content)
+        text_area.setPlainText(content)  # Use setPlainText for better markdown display
         layout.addWidget(text_area)
 
         close_button = QtWidgets.QPushButton("Close", dialog)
@@ -264,7 +265,7 @@ class Window(QtWidgets.QMainWindow):
         layout.addWidget(close_button)
 
         dialog.setLayout(layout)
-        dialog.resize(600, 400)
+        dialog.resize(800, 600)  # Make it larger for better readability
         dialog.exec_()
 
 
@@ -290,72 +291,148 @@ class Window(QtWidgets.QMainWindow):
             self.scene.clear()  # Clear the current scene before loading new data
             
             for item_data in scene_data:
+                item = None
+                
                 if item_data['type'] == 'rectangle':
-                    rect_item = QtWidgets.QGraphicsRectItem(
+                    # Create rectangle item
+                    item = QtWidgets.QGraphicsRectItem(
                         item_data['x'], item_data['y'],
                         item_data['width'], item_data['height']
                     )
-                    rect_item.setBrush(QtGui.QBrush(
-                        QtGui.QColor(item_data['brush_color']), 
-                        item_data['brush_pattern']
-                    ))
-                    rect_item.setPen(QtGui.QPen(
-                        QtGui.QColor(item_data['pen_color']), 
-                        item_data['pen_width']
-                    ))
-                    self.scene.addItem(rect_item)
+                    
+                    # Set complete pen properties
+                    pen = QtGui.QPen()
+                    pen.setColor(QtGui.QColor(item_data['pen_color']))
+                    pen.setWidthF(item_data.get('pen_width', 1.0))
+                    pen.setStyle(item_data.get('pen_style', QtCore.Qt.SolidLine))
+                    pen.setCapStyle(item_data.get('pen_cap_style', QtCore.Qt.SquareCap))
+                    pen.setJoinStyle(item_data.get('pen_join_style', QtCore.Qt.BevelJoin))
+                    pen.setMiterLimit(item_data.get('pen_miter_limit', 2.0))
+                    item.setPen(pen)
+                    
+                    # Set complete brush properties
+                    brush = QtGui.QBrush()
+                    brush.setColor(QtGui.QColor(item_data['brush_color']))
+                    brush.setStyle(item_data.get('brush_style', QtCore.Qt.SolidPattern))
+                    item.setBrush(brush)
                     
                 elif item_data['type'] == 'line':
-                    line_item = QtWidgets.QGraphicsLineItem(
+                    # Create line item
+                    item = QtWidgets.QGraphicsLineItem(
                         item_data['x1'], item_data['y1'],
                         item_data['x2'], item_data['y2']
                     )
-                    line_item.setPen(QtGui.QPen(
-                        QtGui.QColor(item_data['pen_color']), 
-                        item_data['pen_width'],
-                        style=item_data.get('pen_style', QtCore.Qt.SolidLine)
-                    ))
-                    self.scene.addItem(line_item)
+                    
+                    # Set complete pen properties
+                    pen = QtGui.QPen()
+                    pen.setColor(QtGui.QColor(item_data['pen_color']))
+                    pen.setWidthF(item_data.get('pen_width', 1.0))
+                    pen.setStyle(item_data.get('pen_style', QtCore.Qt.SolidLine))
+                    pen.setCapStyle(item_data.get('pen_cap_style', QtCore.Qt.SquareCap))
+                    pen.setJoinStyle(item_data.get('pen_join_style', QtCore.Qt.BevelJoin))
+                    pen.setMiterLimit(item_data.get('pen_miter_limit', 2.0))
+                    item.setPen(pen)
                     
                 elif item_data['type'] == 'ellipse':
-                    ellipse_item = QtWidgets.QGraphicsEllipseItem(
+                    # Create ellipse item
+                    item = QtWidgets.QGraphicsEllipseItem(
                         item_data['x'], item_data['y'],
                         item_data['width'], item_data['height']
                     )
-                    ellipse_item.setBrush(QtGui.QBrush(
-                        QtGui.QColor(item_data['brush_color']), 
-                        item_data['brush_pattern']
-                    ))
-                    ellipse_item.setPen(QtGui.QPen(
-                        QtGui.QColor(item_data['pen_color']), 
-                        item_data['pen_width']
-                    ))
-                    self.scene.addItem(ellipse_item)
+                    
+                    # Set complete pen properties
+                    pen = QtGui.QPen()
+                    pen.setColor(QtGui.QColor(item_data['pen_color']))
+                    pen.setWidthF(item_data.get('pen_width', 1.0))
+                    pen.setStyle(item_data.get('pen_style', QtCore.Qt.SolidLine))
+                    pen.setCapStyle(item_data.get('pen_cap_style', QtCore.Qt.SquareCap))
+                    pen.setJoinStyle(item_data.get('pen_join_style', QtCore.Qt.BevelJoin))
+                    pen.setMiterLimit(item_data.get('pen_miter_limit', 2.0))
+                    item.setPen(pen)
+                    
+                    # Set complete brush properties
+                    brush = QtGui.QBrush()
+                    brush.setColor(QtGui.QColor(item_data['brush_color']))
+                    brush.setStyle(item_data.get('brush_style', QtCore.Qt.SolidPattern))
+                    item.setBrush(brush)
                     
                 elif item_data['type'] == 'polygon':
+                    # Create polygon item
                     polygon = QtGui.QPolygonF([
                         QtCore.QPointF(*point) for point in item_data['points']
                     ])
-                    polygon_item = QtWidgets.QGraphicsPolygonItem(polygon)
-                    polygon_item.setBrush(QtGui.QBrush(
-                        QtGui.QColor(item_data['brush_color']), 
-                        item_data['brush_pattern']
-                    ))
-                    polygon_item.setPen(QtGui.QPen(
-                        QtGui.QColor(item_data['pen_color']), 
-                        item_data['pen_width'],
-                        style=item_data.get('pen_style', QtCore.Qt.SolidLine)
-                    ))
-                    self.scene.addItem(polygon_item)
+                    item = QtWidgets.QGraphicsPolygonItem(polygon)
                     
-                else:  # text item
-                    text_item = QtWidgets.QGraphicsTextItem(item_data['text'])
-                    text_item.setFont(QtGui.QFont(
-                        item_data['font_family'], 
-                        item_data['font_size']
-                    ))
-                    text_item.setPos(item_data['x'], item_data['y'])
-                    self.scene.addItem(text_item)
+                    # Set complete pen properties
+                    pen = QtGui.QPen()
+                    pen.setColor(QtGui.QColor(item_data['pen_color']))
+                    pen.setWidthF(item_data.get('pen_width', 1.0))
+                    pen.setStyle(item_data.get('pen_style', QtCore.Qt.SolidLine))
+                    pen.setCapStyle(item_data.get('pen_cap_style', QtCore.Qt.SquareCap))
+                    pen.setJoinStyle(item_data.get('pen_join_style', QtCore.Qt.BevelJoin))
+                    pen.setMiterLimit(item_data.get('pen_miter_limit', 2.0))
+                    item.setPen(pen)
+                    
+                    # Set complete brush properties
+                    brush = QtGui.QBrush()
+                    brush.setColor(QtGui.QColor(item_data['brush_color']))
+                    brush.setStyle(item_data.get('brush_style', QtCore.Qt.SolidPattern))
+                    item.setBrush(brush)
+                    
+                elif item_data['type'] == 'text':
+                    # Create editable text item
+                    item = EditableTextItem(item_data['text'])
+                    
+                    # Set complete font properties
+                    font = QtGui.QFont()
+                    font.setFamily(item_data.get('font_family', 'Arial'))
+                    font.setPointSize(item_data.get('font_size', 12))
+                    font.setWeight(item_data.get('font_weight', QtGui.QFont.Normal))
+                    font.setItalic(item_data.get('font_italic', False))
+                    font.setUnderline(item_data.get('font_underline', False))
+                    font.setBold(item_data.get('font_bold', False))
+                    font.setStrikeOut(item_data.get('font_strikeout', False))
+                    item.setFont(font)
+                    
+                    # Set text color
+                    text_color = QtGui.QColor(item_data.get('text_color', '#000000'))
+                    item.setDefaultTextColor(text_color)
+                    
+                    # Set text alignment if available
+                    if 'text_alignment' in item_data:
+                        cursor = item.textCursor()
+                        block_format = cursor.blockFormat()
+                        block_format.setAlignment(QtCore.Qt.Alignment(item_data['text_alignment']))
+                        cursor.setBlockFormat(block_format)
+                        item.setTextCursor(cursor)
+                
+                # Apply common properties to all items
+                if item:
+                    # Set position (use new pos_x/pos_y if available, fallback to old x/y)
+                    pos_x = item_data.get('pos_x', item_data.get('x', 0))
+                    pos_y = item_data.get('pos_y', item_data.get('y', 0))
+                    item.setPos(pos_x, pos_y)
+                    
+                    # Set transformation properties
+                    if 'z_value' in item_data:
+                        item.setZValue(item_data['z_value'])
+                    if 'opacity' in item_data:
+                        item.setOpacity(item_data['opacity'])
+                    if 'visible' in item_data:
+                        item.setVisible(item_data['visible'])
+                    if 'rotation' in item_data:
+                        item.setRotation(item_data['rotation'])
+                    
+                    # Set scale if available
+                    scale_x = item_data.get('scale_x', 1.0)
+                    scale_y = item_data.get('scale_y', 1.0)
+                    if scale_x != 1.0 or scale_y != 1.0:
+                        item.setScale(scale_x)  # Note: QGraphicsItem uses uniform scaling
+                    
+                    # Add item to scene
+                    self.scene.addItem(item)
+                    
+            print(f"Loaded {len(scene_data)} items with complete parameters")
                     
         except FileNotFoundError:
             print(f"Error: File '{file_name}' not found")
@@ -365,6 +442,8 @@ class Window(QtWidgets.QMainWindow):
             print(f"Error: Missing key {e} in JSON data")
         except Exception as e:
             print(f"Error loading data: {e}")
+            import traceback
+            traceback.print_exc()
 
 # Méthode de sauvegarde
     def file_save(self):
@@ -375,110 +454,194 @@ class Window(QtWidgets.QMainWindow):
             self.save_scene_to_json(filename)
 
     def save_scene_to_json(self, file_name):
-        scene_data = []  # Liste pour stocker les données de la scène
+        scene_data = []  # List to store scene data
 
         for item in self.scene.items():
+            # Common properties for all items
+            common_props = {
+                'z_value': item.zValue(),
+                'opacity': item.opacity(),
+                'visible': item.isVisible(),
+                'rotation': item.rotation(),
+                'scale_x': item.transform().m11(),
+                'scale_y': item.transform().m22(),
+                'pos_x': item.x(),
+                'pos_y': item.y()
+            }
+            
             if isinstance(item, QtWidgets.QGraphicsRectItem):
+                pen = item.pen()
+                brush = item.brush()
                 scene_data.append({
                     'type': 'rectangle',
-                    'x': item.x(),
-                    'y': item.y(),
+                    'x': item.rect().x(),
+                    'y': item.rect().y(),
                     'width': item.rect().width(),
                     'height': item.rect().height(),
-                    'brush_color': item.brush().color().name(),
-                    'brush_pattern': item.brush().style(),
-                    'pen_color': item.pen().color().name(),
-                    'pen_width': item.pen().width()
+                    # Complete pen properties
+                    'pen_color': pen.color().name(),
+                    'pen_width': pen.widthF(),
+                    'pen_style': pen.style(),
+                    'pen_cap_style': pen.capStyle(),
+                    'pen_join_style': pen.joinStyle(),
+                    'pen_miter_limit': pen.miterLimit(),
+                    # Complete brush properties
+                    'brush_color': brush.color().name(),
+                    'brush_style': brush.style(),
+                    **common_props
                 })
+                
             elif isinstance(item, QtWidgets.QGraphicsLineItem):
+                pen = item.pen()
+                line = item.line()
                 scene_data.append({
                     'type': 'line',
-                    'x1': item.line().x1(),
-                    'y1': item.line().y1(),
-                    'x2': item.line().x2(),
-                    'y2': item.line().y2(),
-                    'pen_color': item.pen().color().name(),
-                    'pen_width': item.pen().width(),
-                    'pen_style': item.pen().style()
-
+                    'x1': line.x1(),
+                    'y1': line.y1(),
+                    'x2': line.x2(),
+                    'y2': line.y2(),
+                    # Complete pen properties
+                    'pen_color': pen.color().name(),
+                    'pen_width': pen.widthF(),
+                    'pen_style': pen.style(),
+                    'pen_cap_style': pen.capStyle(),
+                    'pen_join_style': pen.joinStyle(),
+                    'pen_miter_limit': pen.miterLimit(),
+                    **common_props
                 })
+                
             elif isinstance(item, QtWidgets.QGraphicsEllipseItem):
+                pen = item.pen()
+                brush = item.brush()
                 scene_data.append({
                     'type': 'ellipse',
-                    'x': item.x(),
-                    'y': item.y(),
+                    'x': item.rect().x(),
+                    'y': item.rect().y(),
                     'width': item.rect().width(),
                     'height': item.rect().height(),
-                    'brush_color': item.brush().color().name(),
-                    'brush_pattern': item.brush().style(),
-                    'pen_color': item.pen().color().name(),
-                    'pen_width': item.pen().width(),
-                    'pen_style': item.pen().style()
-
+                    # Complete pen properties
+                    'pen_color': pen.color().name(),
+                    'pen_width': pen.widthF(),
+                    'pen_style': pen.style(),
+                    'pen_cap_style': pen.capStyle(),
+                    'pen_join_style': pen.joinStyle(),
+                    'pen_miter_limit': pen.miterLimit(),
+                    # Complete brush properties
+                    'brush_color': brush.color().name(),
+                    'brush_style': brush.style(),
+                    **common_props
                 })
+                
             elif isinstance(item, QtWidgets.QGraphicsPolygonItem):
-                polygon_points = [(point.x(), point.y()) for point in item.polygon()]  # Corrected iteration
+                pen = item.pen()
+                brush = item.brush()
+                polygon_points = [(point.x(), point.y()) for point in item.polygon()]
                 scene_data.append({
                     'type': 'polygon',
                     'points': polygon_points,
-                    'brush_color': item.brush().color().name(),
-                    'brush_pattern': item.brush().style(),
-                    'pen_color': item.pen().color().name(),
-                    'pen_width': item.pen().width(),
-                    'pen_style': item.pen().style()
+                    # Complete pen properties
+                    'pen_color': pen.color().name(),
+                    'pen_width': pen.widthF(),
+                    'pen_style': pen.style(),
+                    'pen_cap_style': pen.capStyle(),
+                    'pen_join_style': pen.joinStyle(),
+                    'pen_miter_limit': pen.miterLimit(),
+                    # Complete brush properties
+                    'brush_color': brush.color().name(),
+                    'brush_style': brush.style(),
+                    **common_props
                 })
-            elif isinstance(item, QtWidgets.QGraphicsTextItem):
+                
+            elif isinstance(item, (QtWidgets.QGraphicsTextItem, EditableTextItem)):
+                font = item.font()
                 scene_data.append({
                     'type': 'text',
-                    'x': item.x(),
-                    'y': item.y(),
                     'text': item.toPlainText(),
-                    'font_family': item.font().family(),
-                    'font_size': item.font().pointSize()
+                    # Complete font properties
+                    'font_family': font.family(),
+                    'font_size': font.pointSize(),
+                    'font_weight': font.weight(),
+                    'font_italic': font.italic(),
+                    'font_underline': font.underline(),
+                    'font_bold': font.bold(),
+                    'font_strikeout': font.strikeOut(),
+                    # Text color
+                    'text_color': item.defaultTextColor().name(),
+                    # Text alignment (if available)
+                    'text_alignment': int(item.textCursor().blockFormat().alignment()) if hasattr(item, 'textCursor') else 0,
+                    **common_props
                 })
-            
-            # Ajoutez d'autres types d'éléments si nécessaire
 
-        # Sauvegarder les données de la scène dans un fichier JSON
+        # Save scene data to JSON file
         with open(file_name, 'w') as json_file:
             json.dump(scene_data, json_file, indent=4)
         print(f"Scene saved as JSON: {file_name}")
+        print(f"Saved {len(scene_data)} items with complete parameters")
 
     def file_save_as(self):
         try:
-            # Demander à l'utilisateur de choisir un emplacement et un nom de fichier
+            # Ask user to choose location and filename
             options = QtWidgets.QFileDialog.Options()
-            file_name, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save File As", "", 
-                "Images (*.png *.jpg *.bmp);;JSON Files (*.json);;All Files (*)", options=options)
+            file_name, selected_filter = QtWidgets.QFileDialog.getSaveFileName(
+                self, "Save File As", "", 
+                "JSON Files (*.json);;PNG Images (*.png);;JPEG Images (*.jpg);;BMP Images (*.bmp);;All Files (*)", 
+                options=options
+            )
             
             if file_name:
-                if file_name.endswith('.json'):
-                    self.save_scene_to_json(file_name)  # Appeler la méthode pour sauvegarder la scène en JSON
-                else:
-                    # Créer une image vide avec la taille de la scène
-                    rect = self.scene.sceneRect()
-                    image = QtGui.QImage(rect.size().toSize(), QtGui.QImage.Format_ARGB32)
-                    image.fill(QtCore.Qt.white)  # Remplir l'image avec du blanc
-
-                    # Créer un paint device pour dessiner sur l'image
-                    painter = QtGui.QPainter(image)
+                # Determine file type based on extension or selected filter
+                if file_name.lower().endswith('.json') or 'JSON' in selected_filter:
+                    # Ensure .json extension
+                    if not file_name.lower().endswith('.json'):
+                        file_name += '.json'
+                    self.save_scene_to_json(file_name)
+                    QtWidgets.QMessageBox.information(self, "Success", f"Scene saved as JSON: {file_name}")
                     
-                    # Dessiner la scène sur l'image
-                    self.scene.render(painter)
+                else:
+                    # Handle image export
+                    # Ensure proper extension based on selected filter
+                    if 'PNG' in selected_filter and not file_name.lower().endswith('.png'):
+                        file_name += '.png'
+                    elif 'JPEG' in selected_filter and not file_name.lower().endswith(('.jpg', '.jpeg')):
+                        file_name += '.jpg'
+                    elif 'BMP' in selected_filter and not file_name.lower().endswith('.bmp'):
+                        file_name += '.bmp'
+                    
+                    # Create image with scene size
+                    rect = self.scene.sceneRect()
+                    if rect.isEmpty():
+                        # If scene rect is empty, use a default size
+                        rect = QtCore.QRectF(0, 0, 800, 600)
+                    
+                    # Create image with high quality
+                    image = QtGui.QImage(
+                        int(rect.width()), 
+                        int(rect.height()), 
+                        QtGui.QImage.Format_ARGB32_Premultiplied
+                    )
+                    image.fill(QtCore.Qt.white)  # Fill with white background
+
+                    # Create painter for rendering
+                    painter = QtGui.QPainter(image)
+                    painter.setRenderHint(QtGui.QPainter.Antialiasing)
+                    painter.setRenderHint(QtGui.QPainter.HighQualityAntialiasing)
+                    
+                    # Render scene to image
+                    self.scene.render(painter, QtCore.QRectF(image.rect()), rect)
                     painter.end()
 
-                    # Vérifiez si l'image est valide
-                    if image.isNull():
-                        print("Image is null, cannot save.")
-                        return
-
-                    # Enregistrer l'image
-                    if not image.save(file_name):
-                        print(f"Failed to save the image as: {file_name}")
+                    # Save image
+                    if image.save(file_name):
+                        QtWidgets.QMessageBox.information(self, "Success", f"Image saved as: {file_name}")
+                        print(f"Image saved successfully: {file_name}")
                     else:
-                        print(f"Image saved as: {file_name}")
+                        QtWidgets.QMessageBox.warning(self, "Error", f"Failed to save image: {file_name}")
+                        print(f"Failed to save image: {file_name}")
+                        
         except Exception as e:
-            print(f"Error while saving the file: {e}")
+            error_msg = f"Error while saving file: {str(e)}"
+            QtWidgets.QMessageBox.critical(self, "Save Error", error_msg)
+            print(error_msg)
 
 
     def file_exit(self):
@@ -487,10 +650,10 @@ class Window(QtWidgets.QMainWindow):
 
     # Tools actions implementation
     def tools_selection(self,checked,tool) :
-        print("Window.tools_selection()")
-        print("checked : ",checked)
-        print("tool : ",tool)
-        self.view.set_tool(tool)
+        print("Window.tools_selection(self,checked,tool)",checked,tool)
+        if checked:
+            self.view.set_tool(tool)
+        return
 
     # Style actions implementation
     def style_pen_color_selection(self):
