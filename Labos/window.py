@@ -68,7 +68,7 @@ class Window(QtWidgets.QMainWindow):
          # Tools actions
         self.action_tools=QtWidgets.QActionGroup(self)
         # Line tool
-        self.action_tools_line=QtWidgets.QAction(self.tr("&Line"),self)
+        self.action_tools_line=QtWidgets.QAction(QtGui.QIcon('Icons/tool_line.png'),self.tr("&Line"),self)
         self.action_tools_line.setCheckable(True)
         self.action_tools_line.setChecked(True)
         self.action_tools.addAction(self.action_tools_line)
