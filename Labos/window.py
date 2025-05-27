@@ -102,8 +102,7 @@ class Window(QtWidgets.QMainWindow):
         self.action_brush_fill_solid=QtWidgets.QAction(self.tr("&Solid"),self)
         self.action_brush_fill_dense=QtWidgets.QAction(self.tr("&Dense"),self)
         self.action_brush_fill_diag=QtWidgets.QAction(self.tr("&Diagonal"),self)
-        self.action_font_family=QtWidgets.QAction(self.tr("&Font Family"),self)
-
+        self.action_set_font_family=QtWidgets.QAction(self.tr("&Font Family"),self)
         # Help
         self.action_help=QtWidgets.QActionGroup(self)
         self.action_help_aboutus=QtWidgets.QAction(self.tr("&About Us"),self)
@@ -149,11 +148,15 @@ class Window(QtWidgets.QMainWindow):
         self.action_brush_fill_solid.triggered.connect(lambda: self.view.change_brush_style(QtCore.Qt.SolidPattern))
         self.action_brush_fill_dense.triggered.connect(lambda: self.view.change_brush_style(QtCore.Qt.Dense1Pattern))
         self.action_brush_fill_diag.triggered.connect(lambda: self.view.change_brush_style(QtCore.Qt.DiagCrossPattern))
-        # self.action_font_family.triggered.connect(self.view.change_font_family)
+        self.action_set_font_family.triggered.connect(self.view.style_font_family_selection)
+
 
         # Help actions
         self.action_help_aboutus.triggered.connect(self.about_us)
 
+
+
+    
     # File actions implementation
     def file_new(self):
         reply = QtWidgets.QMessageBox.warning(self, "Warning", 
@@ -336,25 +339,18 @@ class Window(QtWidgets.QMainWindow):
         print("Window.style_pen_style_selection()")
         print("style : ",style)
         self.view.set_pen_style(style)
-    def style_pen_thickness_selection(self):
-        print("Window.style_pen_thickness_selection()")
-        thickness, ok = QtWidgets.QInputDialog.getInt(self, "Pen Thickness", "Enter pen thickness:", 1, 1, 10)
-        if ok:
-            self.view.set_pen_thickness(thickness)
+    # def style_pen_thickness_selection(self):
+    #     print("Window.style_pen_thickness_selection()")
+    #     thickness, ok = QtWidgets.QInputDialog.getInt(self, "Pen Thickness", "Enter pen thickness:", 1, 1, 10)
+    #     if ok:
+    #         self.view.set_pen_thickness(thickness)
+
     def style_brush_style_selection(self,style) :
         print("Window.style_brush_style_selection()")
         print("style : ",style)
         self.view.set_brush_style(style)
-    def style_font_family_selection(self):
-        print("Window.style_font_family_selection()")
-        font, ok = QtWidgets.QFontDialog.getFont(self.view.get_font(), self, "Select Font")
-        if ok:
-            self.view.set_font(font)
-    def style_font_size_selection(self):
-        print("Window.style_font_size_selection()")
-        size, ok = QtWidgets.QInputDialog.getInt(self, "Font Size", "Enter font size:", 12, 1, 100)
-        if ok:
-            self.view.set_font_size(size)
+
+
     
 
     # Help actions implementation
@@ -400,7 +396,8 @@ class Window(QtWidgets.QMainWindow):
         menu_style_brush_fill.addAction(self.action_brush_fill_dense)
         menu_style_brush_fill.addAction(self.action_brush_fill_diag)
         menu_style_font= menu_style.addMenu('&Font')
-        menu_style_font.addAction(self.action_font_family)
+        menu_style_font.addAction(self.action_set_font_family)
+
         # Help menu
         menu_help = menubar.addMenu('&Help')
         menu_help.addAction(self.action_help_aboutus)

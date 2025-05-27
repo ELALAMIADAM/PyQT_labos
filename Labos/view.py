@@ -91,6 +91,35 @@ class View (QtWidgets.QGraphicsView) :
     def set_brush_color(self,color) :
         print("View.set_brush_color(self,color)",color)
         self.brush.setColor(QtGui.QColor(color))
+    def change_pen_style(self,style) :
+        print("View.change_pen_style(self,style)",style)
+        if style in [QtCore.Qt.SolidLine, QtCore.Qt.DashLine, QtCore.Qt.DotLine, QtCore.Qt.DashDotLine, QtCore.Qt.DashDotDotLine]:
+            self.pen.setStyle(style)
+        else:
+            print("Invalid pen style:", style)
+    def change_brush_style(self,style) :
+        print("View.change_brush_style(self,style)",style)
+        if style in [QtCore.Qt.SolidPattern, QtCore.Qt.Dense1Pattern, QtCore.Qt.Dense2Pattern, QtCore.Qt.Dense3Pattern,
+                     QtCore.Qt.Dense4Pattern, QtCore.Qt.Dense5Pattern, QtCore.Qt.Dense6Pattern, QtCore.Qt.Dense7Pattern,
+                     QtCore.Qt.HorPattern, QtCore.Qt.VerPattern, QtCore.Qt.CrossPattern, QtCore.Qt.BDiagPattern,
+                     QtCore.Qt.FDiagPattern, QtCore.Qt.DiagCrossPattern]:
+            self.brush.setStyle(style)
+        else:
+            print("Invalid brush style:", style)
+    def change_pen_width(self,width) :
+        print("View.change_pen_width(self,width)",width)
+        if isinstance(width, (int, float)) and width >= 0:
+            self.pen.setWidthF(float(width))
+        else:
+            print("Invalid pen width:", width)
+    def change_pen_cap_style(self,cap_style) :
+        print("View.change_pen_cap_style(self,cap_style)",cap_style)
+        if cap_style in [QtCore.Qt.FlatCap, QtCore.Qt.SquareCap, QtCore.Qt.RoundCap]:
+            self.pen.setCapStyle(cap_style)
+        else:
+            print("Invalid pen cap style:", cap_style)
+    
+    
     def set_pen_style(self,style) :
         print("View.set_pen_style(self,style)",style)
         if style in [QtCore.Qt.SolidLine, QtCore.Qt.DashLine, QtCore.Qt.DotLine, QtCore.Qt.DashDotLine, QtCore.Qt.DashDotDotLine]:
@@ -112,18 +141,24 @@ class View (QtWidgets.QGraphicsView) :
             self.pen.setWidthF(float(width))
         else:
             print("Invalid pen width:", width)
-    def set_pen_cap_style(self,cap_style) :
-        print("View.set_pen_cap_style(self,cap_style)",cap_style)
-        if cap_style in [QtCore.Qt.FlatCap, QtCore.Qt.SquareCap, QtCore.Qt.RoundCap]:
-            self.pen.setCapStyle(cap_style)
+    
+    def change_font_family(self,family) :
+        print("View.change_font_family(self,family)",family)
+        if isinstance(family, str):
+            font = self.font()
+            font.setFamily(family)
+            self.setFont(font)
         else:
-            print("Invalid pen cap style:", cap_style)
-    def set_pen_join_style(self,join_style) :
-        print("View.set_pen_join_style(self,join_style)",join_style)
-        if join_style in [QtCore.Qt.MiterJoin, QtCore.Qt.BevelJoin, QtCore.Qt.RoundJoin]:
-            self.pen.setJoinStyle(join_style)
-        else:
-            print("Invalid pen join style:", join_style)
+            print("Invalid font family:", family)
+    
+    def style_font_family_selection(self):
+        print("View.style_font_family_selection()")
+        font_db = QtGui.QFontDatabase()  # Create an instance of QFontDatabase
+        families = font_db.families()  # Get the list of font families
+        family, ok = QtWidgets.QInputDialog.getItem(self, "Select Font Family", "Font Family:", families)
+        if ok and family:
+            self.change_font_family(family)
+    
     
 
     # Events
