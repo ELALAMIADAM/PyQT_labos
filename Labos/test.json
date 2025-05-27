@@ -1,0 +1,132 @@
+[
+    {
+        "type": "text",
+        "x": 258.0,
+        "y": 374.0,
+        "text": "hello\n",
+        "font_family": "Arial",
+        "font_size": 20
+    },
+    {
+        "type": "line",
+        "x1": 158.0,
+        "y1": 202.0,
+        "x2": 158.0,
+        "y2": 202.0,
+        "pen_color": "#75507b",
+        "pen_width": 2,
+        "pen_style": 3
+    },
+    {
+        "type": "polygon",
+        "points": [
+            [
+                89.0,
+                261.0
+            ],
+            [
+                127.0,
+                274.0
+            ],
+            [
+                130.0,
+                266.0
+            ],
+            [
+                157.0,
+                201.0
+            ]
+        ],
+        "brush_color": "#73d216",
+        "brush_pattern": 2,
+        "pen_color": "#75507b",
+        "pen_width": 2,
+        "pen_style": 3
+    },
+    {
+        "type": "polygon",
+        "points": [
+            [
+                182.0,
+                110.0
+            ],
+            [
+                82.0,
+                258.0
+            ]
+        ],
+        "brush_color": "#73d216",
+        "brush_pattern": 2,
+        "pen_color": "#75507b",
+        "pen_width": 2,
+        "pen_style": 3
+    },
+    {
+        "type": "ellipse",
+        "x": 0.0,
+        "y": 0.0,
+        "width": 109.0,
+        "height": 58.0,
+        "brush_color": "#73d216",
+        "brush_pattern": 2,
+        "pen_color": "#75507b",
+        "pen_width": 2,
+        "pen_style": 3
+    },
+    {
+        "type": "rectangle",
+        "x": 0.0,
+        "y": 0.0,
+        "width": 2.0,
+        "height": 18.0,
+        "brush_color": "#73d216",
+        "brush_pattern": 2,
+        "pen_color": "#75507b",
+        "pen_width": 2
+    },
+    {
+        "type": "rectangle",
+        "x": 0.0,
+        "y": 0.0,
+        "width": 18.0,
+        "height": 35.0,
+        "brush_color": "#73d216",
+        "brush_pattern": 2,
+        "pen_color": "#75507b",
+        "pen_width": 2
+    },
+    {
+        "type": "polygon",
+        "points": [
+            [
+                307.0,
+                169.0
+            ],
+            [
+                411.0,
+                125.0
+            ],
+            [
+                306.0,
+                96.0
+            ],
+            [
+                319.0,
+                212.0
+            ],
+            [
+                317.0,
+                223.0
+            ],
+            [
+                269.0,
+                224.0
+            ]
+        ],
+        "brush_color": "#0000ff",
+        "brush_pattern": 11,
+        "pen_color": "#ff0000",
+        "pen_width": 1,
+        "pen_style": 1
+    }
+]
