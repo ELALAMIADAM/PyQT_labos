@@ -244,59 +244,14 @@ class Window(QtWidgets.QMainWindow):
 
 # Méthode de sauvegarde
     def file_save(self):
-        try:
-            # Demander à l'utilisateur de choisir un emplacement de sauvegarde
-            directory = QtWidgets.QFileDialog.getExistingDirectory(self, "Select Directory to Save File")
-            
-            if not directory:  # Vérifiez si le répertoire est vide
-                print("No directory selected. Save operation cancelled.")
-                return  # Quittez la méthode si le répertoire est vide
-
-            # Créer un menu pour choisir le type de fichier à sauvegarder
-            file_type, _ = QtWidgets.QInputDialog.getItem(self, "Choose File Type", 
-                "Select the type of file to save:", ["Image", "JSON"], 0, False)
-            
-            if not file_type:  # Vérifiez si aucune option n'est sélectionnée
-                print("No file type selected. Save operation cancelled.")
-                return
-
-            if file_type == "Image":
-                # Créez le nom de fichier basé sur le compteur
-                file_name = os.path.join(directory, f"image_{self.image_counter}.png")
-                
-                # Incrémenter le compteur pour le prochain enregistrement
-                self.image_counter += 1
-
-                # Créer une image vide avec la taille de la scène
-                rect = self.scene.sceneRect()
-                image = QtGui.QImage(rect.size().toSize(), QtGui.QImage.Format_ARGB32)
-                image.fill(QtCore.Qt.white)  # Remplir l'image avec du blanc
-
-                # Créer un paint device pour dessiner sur l'image
-                painter = QtGui.QPainter(image)
-                
-                # Dessiner la scène sur l'image
-                self.scene.render(painter)
-                painter.end()
-
-                # Vérifiez si l'image est valide
-                if image.isNull():
-                    print("Image is null, cannot save.")
-                    return
-
-                # Enregistrer l'image
-                if not image.save(file_name):
-                    print(f"Failed to save the image as: {file_name}")
-                else:
-                    print(f"Image saved as: {file_name}")
-            
-            elif file_type == "JSON":
-                file_name = os.path.join(directory, f"scene_{self.image_counter}.json")
-                self.save_scene_to_json(file_name)  # Appeler une méthode pour sauvegarder la scène en JSON
-
-        except Exception as e:
-            print(f"Error while saving the file: {e}")
-
+        file_to_save = open(filename,"wb")
+        print("file_save()")
+        # data = items_to_data(self.scene)
+        # print(data)
+        # Sauvegarder les données de la scène dans un fichier
+        # file_to_save = QtCore.QFile(filename)
+        # pickle.dump(data,file_to_save)
+        # file_to_save.close()
     def save_scene_to_json(self, file_name):
         scene_data = []  # Liste pour stocker les données de la scène
 

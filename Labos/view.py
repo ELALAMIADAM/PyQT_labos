@@ -42,7 +42,7 @@ class View (QtWidgets.QGraphicsView) :
         self.begin,self.end=QtCore.QPoint(0,0),QtCore.QPoint(0,0)
         self.offset=QtCore.QPoint(0,0)
         self.pen,self.brush=None,None
-        self.tool="rectangle"
+        self.tool="line"  # Default tool is line
         self.item=None
 
         self.polygonPointsSets = []  # Initialize an empty list for sets of polygon points
