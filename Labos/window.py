@@ -1,9 +1,23 @@
 # -*- coding: utf-8 -*-
 import os,sys
 from PyQt5 import QtCore,QtGui,QtWidgets
+from PyQt5.QtWidgets import QUndoCommand, QUndoStack, QColorDialog, QMessageBox, QTextEdit
 
 from view import View
 import json
+
+
+class UndoableCommand(QUndoCommand):
+    def __init__(self, description, do_func, undo_func):
+        super().__init__(description)
+        self.do_func = do_func
+        self.undo_func = undo_func
+
+    def redo(self):
+        self.do_func()
+
+    def undo(self):
+        self.undo_func()
 
 class Window(QtWidgets.QMainWindow):
     def __init__(self,position=(0,0),dimension=(500,300)):
@@ -19,10 +33,12 @@ class Window(QtWidgets.QMainWindow):
 
         self.view.setGeometry(x,y,w,h)
         self.scene.setSceneRect(x,y,w,h) 
-
+        self.undo_stack = QtWidgets.QUndoStack(self)
+        self.data = []
         self.create_actions()
         self.connect_actions()
         self.create_menus()
+        
  
     def get_view(self) :
         return self.view
@@ -110,6 +126,13 @@ class Window(QtWidgets.QMainWindow):
         self.action_help_aboutqt = QtWidgets.QAction(self.tr("&About Qt"), self)
         self.action_help_aboutapp = QtWidgets.QAction(self.tr("&About the Application"), self)
 
+        self.action_undo = QtWidgets.QAction("Undo", self)
+        self.action_undo.setShortcut("Ctrl+Z")
+        self.action_undo.triggered.connect(self.undo_stack.undo)
+
+        self.action_redo = QtWidgets.QAction("Redo", self)
+        self.action_redo.setShortcut("Ctrl+Shift+Z")
+        self.action_redo.triggered.connect(self.undo_stack.redo)
 
 
         # Help actions    
@@ -164,6 +187,17 @@ class Window(QtWidgets.QMainWindow):
 
 
 
+    def add_item(self, item):
+            # Define the do and undo functions
+            def do_func():
+                self.data.append(item)
+                print(f"Added: {item}, Data: {self.data}")
+
+            def undo_func():
+                self.data.remove(item)
+                print(f"Removed: {item}, Data: {self.data}")
+            command = UndoableCommand(f"Add {item}", do_func, undo_func)
+            self.undo_stack.push(command)
 
 
     # File actions implementation
@@ -478,7 +512,16 @@ class Window(QtWidgets.QMainWindow):
         print("style : ",style)
         self.view.set_brush_style(style)
 
+    # def perform_action(self):
+    #     # Example of adding a command to the undo stack
+    #     def do_func():
+    #         print("Action performed")
 
+    #     def undo_func():
+    #         print("Action undone")
+
+    #     command = UndoableCommand("Perform Action", do_func, undo_func)
+    #     self.undo_stack.push(command)
     
 
     # Help actions implementation
@@ -525,6 +568,12 @@ class Window(QtWidgets.QMainWindow):
         menu_style_font= menu_style.addMenu('&Font')
         menu_style_font.addAction(self.action_set_font_family)
 
+
+        # Undo/Redo menu
+        self.menu_edit = self.menuBar().addMenu("Edit")
+        self.menu_edit.addAction(self.action_undo)
+        self.menu_edit.addAction(self.action_redo)
+
         # Help menu
         menu_help = menubar.addMenu('&Help')
         menu_help.addAction(self.action_help_aboutus)
@@ -568,6 +617,11 @@ if __name__ == "__main__" :
     dimension=600,400
 
     mw=Window(position,dimension)
+
+    # mw.add_Item
+    mw.add_item("Items 1")
+    mw.add_item("Items 2")
+    
 
     offset=5
     xd,yd=offset,offset

@@ -50,6 +50,8 @@ class View (QtWidgets.QGraphicsView) :
         
         self.create_style()
         self.thickness=1.0
+        self.selected_font_family = "Arial"  # Default font family
+        self.undo_stack = QtWidgets.QUndoStack(self)
 
     def __repr__(self):
         return "<View({},{},{})>".format(self.pen,self.brush,self.tool)
@@ -164,7 +166,7 @@ class View (QtWidgets.QGraphicsView) :
         families = font_db.families()  # Get the list of font families
         family, ok = QtWidgets.QInputDialog.getItem(self, "Select Font Family", "Font Family:", families)
         if ok and family:
-            self.change_font_family(family)
+            self.selected_font_family = family
     
     
     def style_pen_thickness_selection(self):
@@ -173,19 +175,6 @@ class View (QtWidgets.QGraphicsView) :
         if ok:
             self.set_pen_thickness(thickness)
     
-    # Events
-    # def mousePressEvent(self, event):
-    #     print("View.mousePressEvent()")
-    #     print("event.pos() : ",event.pos())
-    #     print("event.screenPos() : ",event.screenPos())
-    #     self.begin=self.end=event.pos()
-    #     if self.scene() :
-    #         self.item=self.scene().itemAt(self.begin,QtGui.QTransform())
-    #         if self.item :
-    #             self.offset =self.begin-self.item.pos()
-    #     else :
-    #         print("View need a scene to display items !!")
-
     def mousePressEvent(self, event):
         print("View.mousePressEvent()")
         print("event.pos() : ", event.pos())
@@ -197,7 +186,9 @@ class View (QtWidgets.QGraphicsView) :
                 self.offset = self.begin - self.item.pos()
             if self.tool == "polygon" and self.scene():
                 # Add the clicked point to the current polygon
-                self.currentPolygonPoints.append(event.pos())
+                new_point = event.pos()
+                self.currentPolygonPoints.append(new_point)
+
                 if len(self.currentPolygonPoints) > 1:
                     # Draw a temporary line between the last two points
                     temp_line = QtWidgets.QGraphicsLineItem(
@@ -205,6 +196,41 @@ class View (QtWidgets.QGraphicsView) :
                     )
                     temp_line.setPen(self.pen)
                     self.scene().addItem(temp_line)
+
+                    # Define undo and redo functions
+                    def do_func():
+                        self.currentPolygonPoints.append(new_point)
+                        self.scene().addItem(temp_line)
+                        print("DO: Added point and temporary line")
+
+                    def undo_func():
+                        self.currentPolygonPoints.pop()
+                        self.scene().removeItem(temp_line)
+                        print("UNDO: Removed point and temporary line")
+
+                    # Create and push the command to the undo stack
+                    command = UndoableCommand("Add Polygon Point", do_func, undo_func)
+                    self.undo_stack.push(command)
+    # def mousePressEvent(self, event):
+    #     print("View.mousePressEvent()")
+    #     print("event.pos() : ", event.pos())
+    #     print("event.screenPos() : ", event.screenPos())
+    #     self.begin = self.end = event.pos()
+    #     if self.scene():
+    #         self.item = self.scene().itemAt(self.begin, QtGui.QTransform())
+    #         if self.item:
+    #             self.offset = self.begin - self.item.pos()
+    #         if self.tool == "polygon" and self.scene():
+    #             # Add the clicked point to the current polygon
+    #             self.currentPolygonPoints.append(event.pos())
+    #             if len(self.currentPolygonPoints) > 1:
+    #                 # Draw a temporary line between the last two points
+    #                 temp_line = QtWidgets.QGraphicsLineItem(
+    #                     QtCore.QLineF(self.currentPolygonPoints[-2], self.currentPolygonPoints[-1])
+    #                 )
+    #                 temp_line.setPen(self.pen)
+    #                 self.scene().addItem(temp_line)
+                    
 
     def mouseDoubleClickEvent(self, event):
         if self.tool == "polygon":
@@ -290,9 +316,9 @@ class View (QtWidgets.QGraphicsView) :
                     text_item.setFocus(QtCore.Qt.MouseFocusReason)
                 else:
                     # Create a new editable text item if none exists
-                    text_item = EditableTextItem("Click to edit text")
+                    text_item = EditableTextItem("edit text")
                     text_item.setPos(event.pos())
-                    text_item.setFont(QtGui.QFont("Arial", 20))
+                    text_item.setFont(QtGui.QFont(self.selected_font_family, 20))
                     text_item.setDefaultTextColor(self.pen.color())
                     self.scene().addItem(text_item)
                     # Enable editing immediately after creation
@@ -312,6 +338,11 @@ class View (QtWidgets.QGraphicsView) :
     def contextMenuEvent(self, event):
         menu = QtWidgets.QMenu()
         
+
+        undo_action = menu.addAction("Undo")
+        redo_action = menu.addAction("Redo")
+        undo_action.triggered.connect(self.undo_stack.undo)
+        redo_action.triggered.connect(self.undo_stack.redo)
         # Sous-menu des outils
         tools_menu = menu.addMenu("Tools")
         line_action = tools_menu.addAction("Line")
@@ -439,6 +470,8 @@ if __name__ == "__main__" :
     model=QtWidgets.QGraphicsScene()
     model.setSceneRect(x,y,w,h)
     view.setScene(model)
+
+    addItem=QtWidgets.QGraphicsRectItem(0,0,100,100)
 
     # Items
     offset=5

@@ -12,7 +12,10 @@ app=QtWidgets.QApplication(sys.argv)
 position=0,0
 dimension=600,400
 mw=Window(position,dimension)
+mw.add_item("Items 1")
+mw.add_item("Items 2")
 
+# mw.add_Item
 # offset=5
 # xd,yd=offset,offset
 # xf,yf=200+offset,100+offset
