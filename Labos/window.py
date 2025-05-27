@@ -85,26 +85,25 @@ class Window(QtWidgets.QMainWindow):
         self.action_tools_poly.setCheckable(True)
         self.action_tools.addAction(self.action_tools_poly)
         # Text tool
-        self.action_tools_text=QtWidgets.QAction(QtGui.QIcon('Icons/tool_line.png'),self.tr("&Text"),self)
+        self.action_tools_text=QtWidgets.QAction(QtGui.QIcon('Icons/tool_text.png'),self.tr("&Text"),self)
         self.action_tools_text.setCheckable(True)
         self.action_tools.addAction(self.action_tools_text)
 
 
         # Style actions    
         self.action_style_pen_color=QtWidgets.QAction(self.tr("&Color"),self)
+        self.action_brush_color_style=QtWidgets.QAction(self.tr("&Brush Color"),self)
+        self.action_style_pen_line_solid=QtWidgets.QAction(self.tr("&Solid"),self)
+        self.action_style_pen_line_dash=QtWidgets.QAction(self.tr("&Dash"),self)
+        self.action_style_pen_line_dot=QtWidgets.QAction(self.tr("&Dot"),self)
+        self.action_style_pen_thickness=QtWidgets.QAction(self.tr("&Thickness"),self)
+        self.action_style_width_1=QtWidgets.QAction(self.tr("&Width 1"),self)
+        self.action_style_width_2=QtWidgets.QAction(self.tr("&Width 2"),self)
+        self.action_brush_fill_solid=QtWidgets.QAction(self.tr("&Solid"),self)
+        self.action_brush_fill_dense=QtWidgets.QAction(self.tr("&Dense"),self)
+        self.action_brush_fill_diag=QtWidgets.QAction(self.tr("&Diagonal"),self)
+        self.action_font_family=QtWidgets.QAction(self.tr("&Font Family"),self)
 
-
-        # # Style
-        # self.action_style_pen_color.triggered.connect(self.style_pen_color_selection)
-        # self.action_brush_color_style.triggered.connect(self.style_brush_color_selection)
-        # self.action_pen_thickness.triggered.connect(self.style_pen_thickness_selection)
-        # self.action_pen_solid.triggered.connect(lambda: self.change_pen_style(QtCore.Qt.SolidLine))
-        # self.action_pen_dash.triggered.connect(lambda: self.change_pen_style(QtCore.Qt.DashLine))
-        # self.action_pen_dot.triggered.connect(lambda: self.change_pen_style(QtCore.Qt.DotLine))
-
-        # self.action_brush_solid.triggered.connect(lambda: self.change_brush_style(QtCore.Qt.SolidPattern))
-        # self.action_brush_dense.triggered.connect(lambda: self.change_brush_style(QtCore.Qt.Dense1Pattern))
-        # self.action_brush_diag.triggered.connect(lambda: self.change_brush_style(QtCore.Qt.DiagCrossPattern))
         # Help
         self.action_help=QtWidgets.QActionGroup(self)
         self.action_help_aboutus=QtWidgets.QAction(self.tr("&About Us"),self)
@@ -140,7 +139,19 @@ class Window(QtWidgets.QMainWindow):
         )
 
         self.action_style_pen_color.triggered.connect(self.style_pen_color_selection)
+        self.action_brush_color_style.triggered.connect(self.style_brush_color_selection)
+        self.action_style_pen_line_solid.triggered.connect(lambda: self.view.change_pen_style(QtCore.Qt.SolidLine))
+        self.action_style_pen_line_dash.triggered.connect(lambda: self.view.change_pen_style(QtCore.Qt.DashLine))
+        self.action_style_pen_line_dot.triggered.connect(lambda: self.view.change_pen_style(QtCore.Qt.DotLine))
+        # self.action_style_pen_thickness.triggered.connect(self.view.style_pen_thickness_selection)
+        self.action_style_width_1.triggered.connect(lambda: self.view.change_pen_width(1))
+        self.action_style_width_2.triggered.connect(lambda: self.view.change_pen_width(2))
+        self.action_brush_fill_solid.triggered.connect(lambda: self.view.change_brush_style(QtCore.Qt.SolidPattern))
+        self.action_brush_fill_dense.triggered.connect(lambda: self.view.change_brush_style(QtCore.Qt.Dense1Pattern))
+        self.action_brush_fill_diag.triggered.connect(lambda: self.view.change_brush_style(QtCore.Qt.DiagCrossPattern))
+        # self.action_font_family.triggered.connect(self.view.change_font_family)
 
+        # Help actions
         self.action_help_aboutus.triggered.connect(self.about_us)
 
     # File actions implementation
@@ -317,7 +328,35 @@ class Window(QtWidgets.QMainWindow):
         color = QtWidgets.QColorDialog.getColor(QtCore.Qt.yellow,self)
         if color.isValid() :
             self.view.set_pen_color(color.name())
- 
+    def style_brush_color_selection(self):
+        color = QtWidgets.QColorDialog.getColor(QtCore.Qt.green,self)
+        if color.isValid() :
+            self.view.set_brush_color(color.name())
+    def style_pen_style_selection(self,style) :
+        print("Window.style_pen_style_selection()")
+        print("style : ",style)
+        self.view.set_pen_style(style)
+    def style_pen_thickness_selection(self):
+        print("Window.style_pen_thickness_selection()")
+        thickness, ok = QtWidgets.QInputDialog.getInt(self, "Pen Thickness", "Enter pen thickness:", 1, 1, 10)
+        if ok:
+            self.view.set_pen_thickness(thickness)
+    def style_brush_style_selection(self,style) :
+        print("Window.style_brush_style_selection()")
+        print("style : ",style)
+        self.view.set_brush_style(style)
+    def style_font_family_selection(self):
+        print("Window.style_font_family_selection()")
+        font, ok = QtWidgets.QFontDialog.getFont(self.view.get_font(), self, "Select Font")
+        if ok:
+            self.view.set_font(font)
+    def style_font_size_selection(self):
+        print("Window.style_font_size_selection()")
+        size, ok = QtWidgets.QInputDialog.getInt(self, "Font Size", "Enter font size:", 12, 1, 100)
+        if ok:
+            self.view.set_font_size(size)
+    
+
     # Help actions implementation
     def help_about_us(self) :
         pass
@@ -342,11 +381,27 @@ class Window(QtWidgets.QMainWindow):
         menu_tool.addAction(self.action_tools_text)
         
         
-
+        # Style menu
         menu_style= menubar.addMenu('&Style')
         menu_style_pen= menu_style.addMenu('&Pen')
         menu_style_pen.addAction(self.action_style_pen_color)
-
+        menu_style_pen_line= menu_style_pen.addMenu('&Line Style')
+        menu_style_pen_line.addAction(self.action_style_pen_line_solid)
+        menu_style_pen_line.addAction(self.action_style_pen_line_dash)
+        menu_style_pen_line.addAction(self.action_style_pen_line_dot)
+        menu_style_pen_line.addAction(self.action_style_pen_thickness)
+        menu_style_pen_width= menu_style_pen.addMenu('&Width')
+        menu_style_pen_width.addAction(self.action_style_width_1)
+        menu_style_pen_width.addAction(self.action_style_width_2)
+        menu_style_brush= menu_style.addMenu('&Brush')
+        menu_style_brush.addAction(self.action_brush_color_style)
+        menu_style_brush_fill= menu_style_brush.addMenu('&Fill Style')
+        menu_style_brush_fill.addAction(self.action_brush_fill_solid)
+        menu_style_brush_fill.addAction(self.action_brush_fill_dense)
+        menu_style_brush_fill.addAction(self.action_brush_fill_diag)
+        menu_style_font= menu_style.addMenu('&Font')
+        menu_style_font.addAction(self.action_font_family)
+        # Help menu
         menu_help = menubar.addMenu('&Help')
         menu_help.addAction(self.action_help_aboutus)
 
