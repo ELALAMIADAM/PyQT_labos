@@ -1,0 +1,176 @@
+[
+    {
+        "type": "text",
+        "text": "TESLA",
+        "font_family": "8514oem",
+        "font_size": 20,
+        "font_weight": 50,
+        "font_italic": false,
+        "font_underline": false,
+        "font_bold": false,
+        "font_strikeout": false,
+        "text_color": "#000000",
+        "text_alignment": 1,
+        "z_value": 1.0,
+        "opacity": 1.0,
+        "visible": true,
+        "rotation": 0.0,
+        "scale_x": 1.0,
+        "scale_y": 1.0,
+        "pos_x": 297.0,
+        "pos_y": 163.0
+    },
+    {
+        "type": "rectangle",
+        "x": 104.0,
+        "y": 72.0,
+        "width": 84.0,
+        "height": 59.0,
+        "pen_color": "#000000",
+        "pen_width": 5.0,
+        "pen_style": 1,
+        "pen_cap_style": 16,
+        "pen_join_style": 64,
+        "pen_miter_limit": 2.0,
+        "brush_color": "#ffffff",
+        "brush_style": 1,
+        "z_value": 1.0,
+        "opacity": 1.0,
+        "visible": true,
+        "rotation": 0.0,
+        "scale_x": 1.0,
+        "scale_y": 1.0,
+        "pos_x": 234.0,
+        "pos_y": 3.0
+    },
+    {
+        "type": "rectangle",
+        "x": 151.0,
+        "y": 316.0,
+        "width": 87.0,
+        "height": 59.0,
+        "pen_color": "#000000",
+        "pen_width": 5.0,
+        "pen_style": 1,
+        "pen_cap_style": 16,
+        "pen_join_style": 64,
+        "pen_miter_limit": 2.0,
+        "brush_color": "#ffffff",
+        "brush_style": 1,
+        "z_value": 1.0,
+        "opacity": 1.0,
+        "visible": true,
+        "rotation": 0.0,
+        "scale_x": 1.0,
+        "scale_y": 1.0,
+        "pos_x": 90.0,
+        "pos_y": -241.0
+    },
+    {
+        "type": "ellipse",
+        "x": 361.0,
+        "y": 286.0,
+        "width": 84.0,
+        "height": 80.0,
+        "pen_color": "#000000",
+        "pen_width": 5.0,
+        "pen_style": 1,
+        "pen_cap_style": 16,
+        "pen_join_style": 64,
+        "pen_miter_limit": 2.0,
+        "brush_color": "#005500",
+        "brush_style": 2,
+        "z_value": 1.0,
+        "opacity": 1.0,
+        "visible": true,
+        "rotation": 0.0,
+        "scale_x": 1.0,
+        "scale_y": 1.0,
+        "pos_x": -9.0,
+        "pos_y": -82.0
+    },
+    {
+        "type": "ellipse",
+        "x": 197.0,
+        "y": 300.0,
+        "width": 79.0,
+        "height": 80.0,
+        "pen_color": "#000000",
+        "pen_width": 5.0,
+        "pen_style": 1,
+        "pen_cap_style": 16,
+        "pen_join_style": 64,
+        "pen_miter_limit": 2.0,
+        "brush_color": "#005500",
+        "brush_style": 2,
+        "z_value": 1.0,
+        "opacity": 1.0,
+        "visible": true,
+        "rotation": 0.0,
+        "scale_x": 1.0,
+        "scale_y": 1.0,
+        "pos_x": 23.0,
+        "pos_y": -94.0
+    },
+    {
+        "type": "polygon",
+        "points": [
+            [
+                123.0,
+                141.0
+            ],
+            [
+                219.0,
+                141.0
+            ],
+            [
+                223.0,
+                62.0
+            ],
+            [
+                430.0,
+                62.0
+            ],
+            [
+                439.0,
+                137.0
+            ],
+            [
+                551.0,
+                137.0
+            ],
+            [
+                553.0,
+                246.0
+            ],
+            [
+                124.0,
+                242.0
+            ],
+            [
+                120.0,
+                144.0
+            ],
+            [
+                120.0,
+                144.0
+            ]
+        ],
+        "pen_color": "#000000",
+        "pen_width": 5.0,
+        "pen_style": 2,
+        "pen_cap_style": 16,
+        "pen_join_style": 64,
+        "pen_miter_limit": 2.0,
+        "brush_color": "#aaffff",
+        "brush_style": 1,
+        "z_value": 0.0,
+        "opacity": 1.0,
+        "visible": true,
+        "rotation": 0.0,
+        "scale_x": 1.0,
+        "scale_y": 1.0,
+        "pos_x": 0.0,
+        "pos_y": 0.0
+    }
+]
